@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>С Днём Рождения! ✨</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Nunito:wght@400;600;700;800&family=Pacifico&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        pastel: {
+                            pink: '#FFD1DC',
+                            rose: '#FFB6C1',
+                            soft: '#FFF0F5',
+                            accent: '#FF69B4',
+                            dark: '#D87093',
+                            purple: '#E6E6FA',
+                            blackBg: '#120813'
+                        }
+                    },
+                    fontFamily: {
+                        nunito: ['Nunito', 'sans-serif'],
+                        caveat: ['Caveat', 'cursive'],
+                        pacifico: ['Pacifico', 'cursive']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(135deg, #FFF0F5 0%, #FFD1DC 50%, #E6E6FA 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            margin: 0;
+            user-select: none;
+        }
+
+        /* Float & Heartbeat animations */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-12px) rotate(3deg); }
+        }
+
+        @keyframes float-slow {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-8px) rotate(-3deg); }
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 10px 25px -5px rgba(255, 105, 180, 0.4); transform: scale(1); }
+            50% { box-shadow: 0 15px 35px -5px rgba(255, 105, 180, 0.7); transform: scale(1.04); }
+        }
+
+        @keyframes sparkle {
+            0%, 100% { opacity: 0.3; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1.2) rotate(15deg); }
+        }
+
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            15% { transform: scale(1.08); }
+            30% { transform: scale(1); }
+            45% { transform: scale(1.05); }
+        }
+
+        .animate-float { animation: float 4s ease-in-out infinite; }
+        .animate-float-slow { animation: float-slow 6s ease-in-out infinite; }
+        .animate-pulse-glow { animation: pulse-glow 2.5s ease-in-out infinite; }
+        .sparkle-icon { animation: sparkle 2s infinite ease-in-out; }
+        .animate-heartbeat { animation: heartbeat 1.8s ease-in-out infinite; }
+
+        /* Glassmorphism styling */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.82);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 2px solid rgba(255, 255, 255, 0.95);
+        }
+
+        /* Canvas fireworks overlay */
+        #fireworksCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 40;
+        }
+
+        /* Intro Screen Overlay */
+        #introScreen {
+            transition: opacity 1s ease-in-out, visibility 1s ease-in-out;
+            background: radial-gradient(circle at center, #1f0b1a 0%, #0d040e 100%);
+        }
+
+        #introScreen.hidden-intro {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #FFF0F5; }
+        ::-webkit-scrollbar-thumb { background: #FFB6C1; border-radius: 4px; }
+    </style>
+</head>
+<body class="relative min-h-screen flex flex-col justify-between items-center p-4 md:p-8">
+
+    <div id="introScreen" class="fixed inset-0 z-50 flex flex-col items-center justify-between p-4 text-center">
+        <!-- Floating ambient glows -->
+        <div class="absolute inset-0 pointer-events-none overflow-hidden">
+            <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-pink-500/20 rounded-full blur-3xl"></div>
+            <span class="sparkle-icon absolute top-8 left-[10%] text-pink-300/60 text-2xl">✨</span>
+            <span class="sparkle-icon absolute bottom-12 right-[10%] text-pink-400/60 text-2xl">💖</span>
+        </div>
+
+        <div class="z-10 mt-4 flex flex-col items-center">
+            <div class="inline-flex items-center gap-2 bg-pink-950/60 backdrop-blur-md px-5 py-2 rounded-full border border-pink-500/30 text-pink-300 font-bold text-xs md:text-sm tracking-wider uppercase mb-2 shadow-lg">
+                <i class="fas fa-heart text-pink-400"></i>
+                <span>Intro</span>
+            </div>
+            
+            <h2 class="font-caveat text-3xl md:text-5xl font-bold text-pink-200 drop-shadow-[0_0_10px_rgba(255,105,180,0.5)]">
+            
+            </h2>
+        </div>
+
+        <!-- Canvas for Python Turtle Heart Simulation -->
+        <div class="relative my-auto flex items-center justify-center w-full max-w-xl">
+            <canvas id="turtleHeartCanvas" width="500" height="450" class="max-w-full max-h-[58vh] drop-shadow-[0_0_20px_rgba(255,182,193,0.5)]"></canvas>
+        </div>
+
+        <!-- Action Button -->
+        <div class="z-10 mb-6 flex flex-col items-center gap-3">
+            <button id="openCardBtn" onclick="openGreetingCard()" class="bg-gradient-to-r from-pink-500 via-rose-400 to-pink-600 hover:from-pink-600 hover:to-rose-500 text-white font-extrabold text-lg px-8 py-3.5 rounded-full shadow-[0_0_25px_rgba(255,105,180,0.6)] transition-all duration-300 hover:scale-105 active:scale-95 flex items-center gap-3 border-2 border-pink-300/50">
+                <span>Открыть открытку </span>
+                <i class="fas fa-heart text-white animate-pulse"></i>
+            </button>
+            <p id="drawingStatus" class="text-xs text-pink-300/70 font-semibold tracking-wide">
+                Отрисовка: <span id="layerProgress" class="text-pink-300">0%</span>
+            </p>
+        </div>
+    </div>
+
+    <canvas id="fireworksCanvas"></canvas>
+
+    <!-- Background Sparkles -->
+    <div class="fixed inset-0 pointer-events-none overflow-hidden z-0">
+        <span class="sparkle-icon absolute top-10 left-[8%] text-pink-400 text-2xl" style="animation-delay: 0s;">✨</span>
+        <span class="sparkle-icon absolute top-1/4 right-[10%] text-pink-300 text-3xl" style="animation-delay: 0.5s;">💖</span>
+        <span class="sparkle-icon absolute bottom-20 left-[12%] text-purple-300 text-2xl" style="animation-delay: 1s;">🌸</span>
+        <span class="sparkle-icon absolute top-2/3 right-[6%] text-pink-400 text-xl" style="animation-delay: 1.5s;">✨</span>
+        <span class="sparkle-icon absolute top-12 right-[22%] text-pink-300 text-2xl" style="animation-delay: 0.8s;">🎀</span>
+    </div>
+
+    <!-- Navigation Header -->
+    <header class="w-full max-w-xl flex justify-between items-center z-10 mb-4 gap-2">
+        <button onclick="replayIntro()" class="flex items-center gap-2 bg-white/80 hover:bg-white text-pink-600 px-3.5 py-1.5 rounded-full shadow-sm transition-all text-xs md:text-sm font-bold border border-pink-200 active:scale-95">
+            <i class="fas fa-redo text-pink-500"></i>
+            <span>Интро «с др»</span>
+        </button>
+        
+        <button id="musicBtn" onclick="toggleAudio()" class="flex items-center gap-2 bg-white/80 hover:bg-white text-pink-600 px-4 py-1.5 rounded-full shadow-md transition-all border border-pink-200 text-xs md:text-sm font-bold active:scale-95">
+            <i id="musicIcon" class="fas fa-volume-mute text-pink-500"></i>
+            <span id="musicText">Музыка</span>
+        </button>
+    </header>
+
+    <main class="w-full max-w-xl glass-card rounded-3xl p-6 md:p-10 shadow-2xl z-10 text-center relative overflow-hidden my-auto border-2 border-white">
+        
+        <!-- Top Badge -->
+        <div class="inline-block bg-gradient-to-r from-pink-400 to-rose-400 text-white px-6 py-1.5 rounded-full text-xs md:text-sm tracking-wider font-bold shadow-md uppercase mb-4 animate-float-slow">
+            🎉 Happy Birthday! 🎉
+        </div>
+
+        <!-- Birthday Title -->
+        <h1 class="font-caveat text-5xl md:text-6xl font-bold text-pink-600 mb-2 drop-shadow-sm">
+            С ДЭРЭШЕЧКОЙ!!!
+        </h1>
+        <p class="text-pink-800/80 font-medium text-sm md:text-base mb-6">
+            Пусть твой день будет слаще самых вкусных пирожных и ярче розовых блёсток! ✨
+        </p>
+
+        <!-- Pusheen Interactive Custom Image with EXPLICITLY LARGER Cake Overlay (NO HAT) -->
+        <div class="relative w-72 h-72 mx-auto mb-6 flex items-center justify-center cursor-pointer group" onclick="clickPusheen(event)" title="Кликни на Пушина!">
+            <!-- Meow Bubble Tooltip -->
+            <div id="meowBubble" class="absolute -top-4 bg-white/95 text-pink-600 font-extrabold text-sm px-4 py-1.5 rounded-2xl shadow-lg border-2 border-pink-300 opacity-0 transition-all duration-300 transform scale-75 pointer-events-none z-30">
+                Мяу! 🐾💖
+            </div>
+
+            <!-- Glowing Background Aura -->
+            <div class="absolute inset-0 bg-gradient-to-tr from-pink-300 to-rose-200 rounded-full blur-2xl opacity-60 group-hover:opacity-90 transition-opacity"></div>
+            
+            <!-- Floating Sparkles around Pusheen -->
+            <div class="absolute top-2 left-2 text-pink-400 text-2xl animate-bounce">✨</div>
+            <div class="absolute top-6 right-0 text-pink-500 text-2xl animate-pulse">💖</div>
+            <div class="absolute bottom-4 left-0 text-purple-400 text-2xl animate-pulse">🎀</div>
+
+            <!-- Container for Image + Cake Overlay -->
+            <div class="relative w-full h-full flex items-center justify-center transition-transform duration-300 group-hover:scale-105">
+                
+                <!-- Pusheen PNG Image (Clean without hat) -->
+                <img src="https://avatanplus.com/files/resources/original/59304cf54343415c64ac9e1c.png" 
+                     alt="Пушин" 
+                     class="w-60 h-auto object-contain z-10 filter drop-shadow-md select-none translate-y-[-10px]"
+                     onerror="this.onerror=null; this.src='https://placehold.co/240x200/ffb6c1/ffffff?text=Pusheen';"
+                />
+
+                <!-- MUCH LARGER Birthday Cake SVG with Candle (160px Width & Height) Positioned Centered In Front -->
+                <svg class="absolute -bottom-[15px] right-[10px] w-40 h-40 z-20 filter drop-shadow-xl hover:scale-110 transition-transform duration-200" viewBox="0 0 100 100" onclick="blowCandle(); event.stopPropagation();">
+                    <g transform="translate(5, 5)">
+                        <!-- Plate -->
+                        <ellipse cx="45" cy="72" rx="42" ry="11" fill="#E2E8F0" stroke="#5A4E44" stroke-width="3.5"/>
+                        <!-- Cake Body -->
+                        <rect x="12" y="32" width="66" height="38" rx="6" fill="#FFC0CB" stroke="#5A4E44" stroke-width="4"/>
+                        <!-- Cake Middle Layer Line -->
+                        <path d="M 12,52 Q 45,58 78,52" fill="none" stroke="#FFF" stroke-width="3" stroke-dasharray="4,3"/>
+                        <!-- Cream / Icing Dripping -->
+                        <path d="M 12,42 Q 20,50 28,42 Q 36,50 44,42 Q 52,50 60,42 Q 68,50 78,42 L 78,32 L 12,32 Z" fill="#FFF" stroke="#5A4E44" stroke-width="3"/>
+                        
+                        <!-- Color Sprinkles -->
+                        <circle cx="24" cy="38" r="2.5" fill="#FF1493"/>
+                        <circle cx="45" cy="40" r="2.5" fill="#FFD700"/>
+                        <circle cx="64" cy="38" r="2.5" fill="#00BFFF"/>
+                        <circle cx="34" cy="60" r="2.5" fill="#32CD32"/>
+                        <circle cx="56" cy="62" r="2.5" fill="#FF69B4"/>
+                        
+                        <!-- Candle -->
+                        <rect x="40" y="8" width="10" height="24" fill="#FFF" stroke="#5A4E44" stroke-width="3" rx="2"/>
+                        <path d="M 40,16 L 50,16" stroke="#FF69B4" stroke-width="3"/>
+                        <path d="M 40,24 L 50,24" stroke="#FF69B4" stroke-width="3"/>
+                        
+                        <!-- Candle Flame -->
+                        <g id="candleFlame">
+                            <path d="M 45,-5 Q 53,2 45,10 Q 37,2 45,-5 Z" fill="#FFD700" stroke="#FF8C00" stroke-width="2.5">
+                                <animate attributeName="opacity" values="0.85;1;0.85" dur="0.5s" repeatCount="indefinite"/>
+                            </path>
+                            <circle cx="45" cy="4" r="2.5" fill="#FFF"/>
+                        </g>
+
+                        <!-- Smoke Effect when candle is blown -->
+                        <g id="candleSmoke" opacity="0">
+                            <path d="M 45,-8 Q 40,-20 48,-32" stroke="#CBD5E1" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+                        </g>
+                    </g>
+                </svg>
+
+            </div>
+        </div>
+
+        <!-- Greeting Text Card -->
+        <div class="bg-white/80 rounded-2xl p-5 mb-6 text-left border border-pink-100 shadow-inner">
+            <p class="text-pink-900 leading-relaxed font-bold mb-2">
+                Соняяя! 🎉✨
+            </p>
+            <p class="text-pink-800/90 text-sm leading-relaxed mb-3">
+                Желаю тебе бесконечного счастья, самых сладких моментов, исполнения всех мечтаний и морей улыбок!
+            </p>
+            <p class="text-pink-700/80 text-xs font-semibold">
+                Пусть каждый день дарит уют, любовь и волшебство, а Пушин приносит только самые радостные вести! 🌸🍰
+            </p>
+        </div>
+
+        <!-- Interactive Buttons Group -->
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <button id="blowCandleBtn" onclick="blowCandle()" class="w-full sm:w-auto bg-white hover:bg-pink-50 text-pink-600 font-bold text-sm px-6 py-3 rounded-full shadow-md border-2 border-pink-300 transition-all duration-300 hover:scale-105 active:scale-95 flex items-center justify-center gap-2">
+                <i class="fas fa-wind text-pink-400"></i>
+                <span id="blowText">Задуть свечу 🎂</span>
+            </button>
+
+            <button onclick="triggerFireworks(event)" class="w-full sm:w-auto bg-gradient-to-r from-pink-400 via-rose-400 to-pink-500 hover:from-pink-500 hover:to-rose-500 text-white font-extrabold text-sm px-7 py-3 rounded-full shadow-lg transition-all duration-300 hover:shadow-pink-300/80 hover:scale-105 active:scale-95 animate-pulse-glow flex items-center justify-center gap-2">
+                <i class="fas fa-sparkles"></i>
+                <span>Розовый салют!</span>
+            </button>
+        </div>
+
+    </main>
+
+   
+
+    <script>
+        // --- 1. PYTHON TURTLE MATH HEART ALGORITHM (SLOWEST STEP-BY-STEP SPEED) ---
+        // Formula:
+        // x = 16 * sin(t)^3
+        // y = 13 * cos(t) - 5 * cos(2t) - 2 * cos(3t) - cos(4t)
+        // Scale range: 11 to 16
+
+        const turtleCanvas = document.getElementById('turtleHeartCanvas');
+        const tCtx = turtleCanvas.getContext('2d');
+        
+        let heartPointsList = [];
+        let drawingIndex = 0;
+        let isDrawingDone = false;
+        let turtleAnimationId = null;
+
+        function prepareTurtleHeartPoints() {
+            heartPointsList = [];
+            const pointsPerLayer = 120;
+            const minScale = 11;
+            const maxScale = 16;
+
+            for (let scale = minScale; scale <= maxScale; scale++) {
+                for (let i = 0; i < pointsPerLayer; i++) {
+                    const t = i * (Math.PI * 2) / pointsPerLayer;
+                    
+                    const x = 16 * Math.pow(Math.sin(t), 3);
+                    const y = (13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t));
+
+                    heartPointsList.push({
+                        x: x * scale,
+                        y: y * scale,
+                        scale: scale
+                    });
+                }
+            }
+        }
+
+        function renderTurtleHeartStep() {
+            const centerX = turtleCanvas.width / 2;
+            const centerY = turtleCanvas.height / 2 - 10;
+
+            tCtx.clearRect(0, 0, turtleCanvas.width, turtleCanvas.height);
+
+            // Font styling for "с др"
+            tCtx.font = "bold 9px Arial, sans-serif";
+            tCtx.textAlign = "center";
+            tCtx.textBaseline = "middle";
+
+            const pointsToDraw = drawingIndex;
+            const textToDraw = "с др";
+
+            for (let k = 0; k < pointsToDraw; k++) {
+                const pt = heartPointsList[k];
+                const canvasX = centerX + pt.x;
+                const canvasY = centerY - pt.y; // Inverted Y coordinate
+
+                tCtx.save();
+                tCtx.translate(canvasX, canvasY);
+                
+                // Color #ffb6c1 with subtle glow for new points
+                if (k >= pointsToDraw - 2) {
+                    tCtx.shadowColor = '#FF69B4';
+                    tCtx.shadowBlur = 8;
+                    tCtx.fillStyle = '#FFFFFF';
+                } else {
+                    tCtx.fillStyle = '#FFB6C1';
+                }
+
+                tCtx.fillText(textToDraw, 0, 0);
+                tCtx.restore();
+            }
+
+            // Progress text update
+            const progress = Math.min(100, Math.floor((drawingIndex / heartPointsList.length) * 100));
+            const progressEl = document.getElementById('layerProgress');
+            if (progressEl) progressEl.innerText = `${progress}%`;
+
+            if (drawingIndex < heartPointsList.length) {
+                drawingIndex += 1; // 1 point per frame = maximum smooth slow drawing
+                turtleAnimationId = requestAnimationFrame(renderTurtleHeartStep);
+            } else {
+                isDrawingDone = true;
+                turtleCanvas.classList.add('animate-heartbeat');
+            }
+        }
+
+        function startTurtleHeartAnimation() {
+            if (turtleAnimationId) cancelAnimationFrame(turtleAnimationId);
+            drawingIndex = 0;
+            isDrawingDone = false;
+            turtleCanvas.classList.remove('animate-heartbeat');
+            prepareTurtleHeartPoints();
+            renderTurtleHeartStep();
+        }
+
+        function openGreetingCard() {
+            const intro = document.getElementById('introScreen');
+            intro.classList.add('hidden-intro');
+            
+            setTimeout(() => {
+                createFireworkBurst(window.innerWidth * 0.5, window.innerHeight * 0.4);
+                setTimeout(() => {
+                    createFireworkBurst(window.innerWidth * 0.3, window.innerHeight * 0.35);
+                    createFireworkBurst(window.innerWidth * 0.7, window.innerHeight * 0.35);
+                }, 200);
+            }, 300);
+        }
+
+        function replayIntro() {
+            const intro = document.getElementById('introScreen');
+            intro.classList.remove('hidden-intro');
+            startTurtleHeartAnimation();
+        }
+
+        // --- 2. WEB AUDIO SYNTHESIZER ---
+        let audioCtx = null;
+        let isMusicPlaying = false;
+        let bgMusicTimer = null;
+
+        function initAudioContext() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playPopSound() {
+            try {
+                initAudioContext();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                
+                const freq = 380 + Math.random() * 350;
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(70, audioCtx.currentTime + 0.12);
+
+                gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.12);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.12);
+            } catch (e) {}
+        }
+
+        function playMeowSound() {
+            try {
+                initAudioContext();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(550, audioCtx.currentTime);
+                osc.frequency.linearRampToValueAtTime(750, audioCtx.currentTime + 0.15);
+                osc.frequency.linearRampToValueAtTime(500, audioCtx.currentTime + 0.35);
+
+                gain.gain.setValueAtTime(0.01, audioCtx.currentTime);
+                gain.gain.linearRampToValueAtTime(0.12, audioCtx.currentTime + 0.1);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.35);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.35);
+            } catch (e) {}
+        }
+
+        function toggleAudio() {
+            initAudioContext();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+
+            const musicIcon = document.getElementById('musicIcon');
+            const musicText = document.getElementById('musicText');
+
+            if (!isMusicPlaying) {
+                isMusicPlaying = true;
+                musicIcon.className = "fas fa-volume-up text-pink-500 animate-bounce";
+                musicText.innerText = "Стоп";
+                startBgMelody();
+            } else {
+                isMusicPlaying = false;
+                musicIcon.className = "fas fa-volume-mute text-pink-500";
+                musicText.innerText = "Музыка";
+                stopBgMelody();
+            }
+        }
+
+        const melodyNotes = [
+            261.63, 261.63, 293.66, 261.63, 349.23, 329.63,
+            261.63, 261.63, 293.66, 261.63, 392.00, 349.23,
+            261.63, 261.63, 523.25, 440.00, 349.23, 329.63, 293.66
+        ];
+        let noteIdx = 0;
+
+        function startBgMelody() {
+            if (!isMusicPlaying) return;
+            
+            function playNextNote() {
+                if (!isMusicPlaying) return;
+                
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(melodyNotes[noteIdx], audioCtx.currentTime);
+                
+                gain.gain.setValueAtTime(0.06, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.38);
+                
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.38);
+
+                noteIdx = (noteIdx + 1) % melodyNotes.length;
+                bgMusicTimer = setTimeout(playNextNote, 420);
+            }
+            playNextNote();
+        }
+
+        function stopBgMelody() {
+            if (bgMusicTimer) clearTimeout(bgMusicTimer);
+        }
+
+        // --- 3. CANVAS FIREWORKS SYSTEM ---
+        const canvas = document.getElementById('fireworksCanvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        let particles = [];
+        const pinkPalette = [
+            '#FF69B4', '#FFB6C1', '#FFC0CB', '#FF1493', 
+            '#DB7093', '#E6E6FA', '#FFF0F5', '#FFD700'
+        ];
+
+        class Particle {
+            constructor(x, y, isGlitter = false) {
+                this.x = x;
+                this.y = y;
+                this.isGlitter = isGlitter;
+                
+                const angle = Math.random() * Math.PI * 2;
+                const speed = isGlitter ? (Math.random() * 3 + 1) : (Math.random() * 7 + 2);
+                
+                this.vx = Math.cos(angle) * speed;
+                this.vy = Math.sin(angle) * speed - (isGlitter ? 0 : 2);
+                
+                this.color = pinkPalette[Math.floor(Math.random() * pinkPalette.length)];
+                this.radius = isGlitter ? (Math.random() * 2 + 1) : (Math.random() * 4 + 2);
+                this.alpha = 1;
+                this.decay = Math.random() * 0.02 + 0.012;
+                this.gravity = 0.12;
+                this.rotation = Math.random() * Math.PI * 2;
+                this.spin = (Math.random() - 0.5) * 0.2;
+                this.shape = Math.random() > 0.6 ? 'star' : (Math.random() > 0.5 ? 'circle' : 'heart');
+            }
+
+            update() {
+                this.vx *= 0.98;
+                this.vy *= 0.98;
+                this.vy += this.gravity;
+                this.x += this.vx;
+                this.y += this.vy;
+                this.alpha -= this.decay;
+                this.rotation += this.spin;
+            }
+
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = Math.max(this.alpha, 0);
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.rotation);
+                ctx.fillStyle = this.color;
+
+                if (this.shape === 'star') {
+                    ctx.beginPath();
+                    for (let i = 0; i < 4; i++) {
+                        ctx.lineTo(Math.cos((i * Math.PI) / 2) * this.radius * 2, Math.sin((i * Math.PI) / 2) * this.radius * 2);
+                        ctx.lineTo(Math.cos((i * Math.PI) / 2 + Math.PI / 4) * this.radius * 0.5, Math.sin((i * Math.PI) / 2 + Math.PI / 4) * this.radius * 0.5);
+                    }
+                    ctx.closePath();
+                    ctx.fill();
+                } else if (this.shape === 'heart') {
+                    ctx.beginPath();
+                    const r = this.radius * 1.2;
+                    ctx.moveTo(0, 0);
+                    ctx.bezierCurveTo(-r, -r, -r * 1.5, r * 0.5, 0, r * 1.5);
+                    ctx.bezierCurveTo(r * 1.5, r * 0.5, r, -r, 0, 0);
+                    ctx.fill();
+                } else {
+                    ctx.beginPath();
+                    ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                ctx.restore();
+            }
+        }
+
+        function createFireworkBurst(originX, originY) {
+            playPopSound();
+            const particleCount = 65;
+            for (let i = 0; i < particleCount; i++) {
+                particles.push(new Particle(originX, originY, false));
+            }
+            for (let i = 0; i < 20; i++) {
+                particles.push(new Particle(originX, originY, true));
+            }
+        }
+
+        function triggerFireworks(event) {
+            let x = window.innerWidth / 2;
+            let y = window.innerHeight / 2;
+
+            if (event && event.clientX && event.clientY) {
+                x = event.clientX;
+                y = event.clientY;
+            }
+
+            createFireworkBurst(x, y);
+
+            setTimeout(() => {
+                createFireworkBurst(x - (Math.random() * 200 - 100), y - (Math.random() * 150));
+            }, 150);
+        }
+
+        window.addEventListener('pointerdown', (e) => {
+            if (e.target.closest('button') || e.target.closest('#introScreen') || e.target.closest('svg')) return;
+            createFireworkBurst(e.clientX, e.clientY);
+        });
+
+        function animateFireworks() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            for (let i = particles.length - 1; i >= 0; i--) {
+                particles[i].update();
+                particles[i].draw();
+
+                if (particles[i].alpha <= 0) {
+                    particles.splice(i, 1);
+                }
+            }
+
+            requestAnimationFrame(animateFireworks);
+        }
+
+        // --- 4. INTERACTIVE CANDLE & PUSHEEN ---
+        let candleIsBlown = false;
+
+        function blowCandle() {
+            const flame = document.getElementById('candleFlame');
+            const smoke = document.getElementById('candleSmoke');
+            const blowText = document.getElementById('blowText');
+
+            if (!candleIsBlown) {
+                flame.style.display = 'none';
+                smoke.style.opacity = '1';
+                candleIsBlown = true;
+                blowText.innerText = "Зажечь снова 🕯️";
+                
+                triggerFireworks();
+            } else {
+                flame.style.display = 'block';
+                smoke.style.opacity = '0';
+                candleIsBlown = false;
+                blowText.innerText = "Задуть свечу 🎂";
+            }
+        }
+
+        function clickPusheen(e) {
+            playMeowSound();
+            
+            const bubble = document.getElementById('meowBubble');
+            bubble.style.opacity = '1';
+            bubble.style.transform = 'scale(1)';
+
+            setTimeout(() => {
+                bubble.style.opacity = '0';
+                bubble.style.transform = 'scale(0.75)';
+            }, 1200);
+
+            const x = e.clientX || window.innerWidth / 2;
+            const y = e.clientY || window.innerHeight / 2;
+            createFireworkBurst(x, y);
+        }
+
+        window.onload = function () {
+            animateFireworks();
+            startTurtleHeartAnimation();
+        };
+    </script>
+</body>
+</html>
